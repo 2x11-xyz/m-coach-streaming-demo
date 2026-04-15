@@ -499,7 +499,7 @@
                                 
                                 // Accumulate the raw JSON string
                                 if (data.choices?.[0]?.delta?.content) {
-                                    fullJsonString += data.choices[0].delta.content;
+                                    fullJsonString += data.choices[0].delta.content.replace(/^```json\n?/g, "").replace(/\n?```$/g, "");
                                     
                                     // Parse the accumulated string on the fly to extract the "coach" text
                                     // This mirrors the Regex/Parsing logic we built into the Supabase Orchestrator
