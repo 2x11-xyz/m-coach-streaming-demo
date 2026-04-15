@@ -425,7 +425,7 @@
                 metrics.style.color = "#dc2626"; // Red for slow
 
                 // Remove typing indicator
-                if (chat.contains(typing)) { if (chat.contains(typing)) { chat.removeChild(typing); } }
+                if (chat.contains(typing)) { if (chat.contains(typing)) { if (chat.contains(typing)) { chat.removeChild(typing); } } }
 
                 // Add complete message
                 const parsed = JSON.parse(data.choices[0].message.content);
@@ -439,7 +439,7 @@
 
             } catch (err) {
                 metrics.textContent = `Error: ${err.message}`;
-                chat.removeChild(typing);
+                if (chat.contains(typing)) { chat.removeChild(typing); }
             }
         }
 
