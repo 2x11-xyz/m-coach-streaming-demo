@@ -280,6 +280,7 @@
         // The exact schema our gateway expects for Partner chat
         const SCHEMA = {
             "type": "object",
+            "additionalProperties": false,
             "properties": {
                 "phase_reasoning": { "type": "string" },
                 "understood_phase": { "type": "string", "enum": ["greeting", "moment_shared", "explore"] },
@@ -288,6 +289,7 @@
                     "type": "array",
                     "items": {
                         "type": "object",
+            "additionalProperties": false,
                         "properties": {
                             "type": { "type": "string" },
                             "content": { "type": "string" },
