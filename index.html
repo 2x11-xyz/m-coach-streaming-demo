@@ -425,7 +425,7 @@
                 metrics.style.color = "#dc2626"; // Red for slow
 
                 // Remove typing indicator
-                chat.removeChild(typing);
+                if (chat.contains(typing)) { if (chat.contains(typing)) { chat.removeChild(typing); } }
 
                 // Add complete message
                 const parsed = JSON.parse(data.choices[0].message.content);
@@ -532,7 +532,8 @@
                 metrics.textContent = `TTFB: ${ttfb}s | Final Render: ${totalTime}s`;
                 
                 try {
-                    const finalData = JSON.parse(fullJsonString.trim().replace(/^```json\n?/g, "").replace(/\n?```$/g, ""));
+                    const sanitizedJson = fullJsonString.trim().replace(/^\s*```[a-zA-Z]*\s*/, '').replace(/\s*```\s*$/, '');
+                    const finalData = JSON.parse(sanitizedJson);
                     renderCards(chat, finalData.cards);
                 } catch(e) {
                     console.error("Failed to parse final JSON block", e);
