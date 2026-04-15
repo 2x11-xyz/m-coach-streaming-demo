@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M Coach Streaming Demo</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f5;
+            --chat-bg: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --accent: #3b82f6;
+            --border: #e5e7eb;
+            --system: #9ca3af;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .phone-mockup {
+            flex: 1;
+            background: var(--chat-bg);
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+            border: 8px solid #111827;
+        }
+
+        .header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+            background: #f9fafb;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .metrics {
+            font-size: 0.875rem;
+            color: var(--system);
+            margin-top: 0.5rem;
+            font-family: monospace;
+            min-height: 1.2rem;
+        }
+
+        .chat-area {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .bubble {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 18px;
+            line-height: 1.5;
+            position: relative;
+        }
+
+        .bubble.user {
+            background: var(--accent);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bubble.assistant {
+            background: #f3f4f6;
+            color: var(--text-primary);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            height: 20px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--system);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            width: 100%;
+            align-self: center;
+            max-width: 80%;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 0.9rem;
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        .card-type {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-note {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .controls {
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--text-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #000;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .config {
+            margin-top: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 1200px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .config input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: monospace;
+        }
+
+        .config label {
+            font-weight: 600;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>M Coach: TTFB Streaming Comparison</h1>
+    <p class="subtitle">This showcases the latency difference between the legacy monolithic HTTP response and the new Server-Sent Events (SSE) streaming implementation via the VLM Gateway.</p>
+
+    <div class="container">
+        <!-- Legacy Monolithic Box -->
+        <div class="phone-mockup" id="legacy-phone">
+            <div class="header">
+                <h2>Legacy (Blocking)</h2>
+                <div class="metrics" id="legacy-metrics">Waiting to start...</div>
+            </div>
+            <div class="chat-area" id="legacy-chat">
+                <div class="bubble assistant">Hello! I'm M. How are you feeling today?</div>
+            </div>
+            <div class="controls">
+                <button onclick="triggerComparison()" id="btn-legacy">Send Message</button>
+            </div>
+        </div>
+
+        <!-- New Streaming Box -->
+        <div class="phone-mockup" id="stream-phone">
+            <div class="header">
+                <h2>New (SSE Streaming)</h2>
+                <div class="metrics" id="stream-metrics">Waiting to start...</div>
+            </div>
+            <div class="chat-area" id="stream-chat">
+                <div class="bubble assistant">Hello! I'm M. How are you feeling today?</div>
+            </div>
+            <div class="controls">
+                <button onclick="triggerComparison()" id="btn-stream">Send Message</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="config">
+        <label for="apiKey">Gateway API Key:</label>
+        <input type="password" id="apiKey" placeholder="Enter VLM Gateway API Key here..." />
+    </div>
+
+    <script>
+        const GATEWAY_URL = 'https://gateway-git-feature-sse-streaming-matter-xyz.vercel.app/v1/chat/completions';
+        const MODEL = 'claude-sonnet';
+        // A complex prompt to force Claude to think for a few seconds so the TTFB difference is obvious
+        const PROMPT = "I'm feeling incredibly overwhelmed and anxious about a massive project deadline tomorrow. I don't know where to start, my chest is tight, and I feel like I'm failing. Please analyze my emotional state, explain the neurochemistry behind this acute stress response (specifically cortisol and adrenaline), and give me three actionable, structured steps to regain control right now. Make the response extremely detailed, warm, empathetic, and at least 3 paragraphs long.";
+
+        // The exact schema our gateway expects for Partner chat
+        const SCHEMA = {
+            "type": "object",
+            "properties": {
+                "phase_reasoning": { "type": "string" },
+                "understood_phase": { "type": "string", "enum": ["greeting", "moment_shared", "explore"] },
+                "coach": { "type": "string" },
+                "cards": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "type": { "type": "string" },
+                            "content": { "type": "string" },
+                            "note": { "type": "string" }
+                        },
+                        "required": ["type", "content", "note"]
+                    }
+                }
+            },
+            "required": ["phase_reasoning", "understood_phase", "coach", "cards"]
+        };
+
+        function getPayload(stream) {
+            return {
+                model: MODEL,
+                messages: [
+                    { role: "system", content: "You are M, an empathetic neuroscience-backed wellness coach. Always output structured JSON matching the provided schema." },
+                    { role: "user", content: PROMPT }
+                ],
+                stream: stream,
+                max_tokens: 1000,
+                response_format: {
+                    type: "json_schema",
+                    json_schema: {
+                        name: "partner_response",
+                        schema: SCHEMA,
+                        strict: true
+                    }
+                },
+                ...(stream && { stream_options: { include_usage: true } })
+            };
+        }
+
+        function createTypingIndicator() {
+            const div = document.createElement('div');
+            div.className = 'bubble assistant typing-indicator-container';
+            div.innerHTML = `<div class="typing-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+            return div;
+        }
+
+        function createUserMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'bubble user';
+            div.textContent = text;
+            return div;
+        }
+
+        function renderCards(container, cards) {
+            if (!cards || cards.length === 0) return;
+            
+            const cardsContainer = document.createElement('div');
+            cardsContainer.className = 'cards-container';
+            
+            cards.forEach(card => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card';
+                cardEl.innerHTML = `
+                    <div class="card-type">${card.type}</div>
+                    <div class="card-title">${card.content}</div>
+                    <div class="card-note">${card.note || ''}</div>
+                `;
+                cardsContainer.appendChild(cardEl);
+            });
+            
+            container.appendChild(cardsContainer);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function triggerComparison() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            if (!apiKey) {
+                alert("Please enter the Gateway API Key first.");
+                return;
+            }
+
+            // Disable buttons
+            document.getElementById('btn-legacy').disabled = true;
+            document.getElementById('btn-stream').disabled = true;
+
+            // Reset chat areas
+            const legacyChat = document.getElementById('legacy-chat');
+            const streamChat = document.getElementById('stream-chat');
+            
+            // Keep only the first welcome message
+            while (legacyChat.children.length > 1) legacyChat.removeChild(legacyChat.lastChild);
+            while (streamChat.children.length > 1) streamChat.removeChild(streamChat.lastChild);
+
+            // Add user message
+            const shortPrompt = "I'm feeling incredibly overwhelmed and anxious about a massive project deadline tomorrow...";
+            legacyChat.appendChild(createUserMessage(shortPrompt));
+            streamChat.appendChild(createUserMessage(shortPrompt));
+
+            // Start test
+            const startTime = performance.now();
+            
+            // Run both simultaneously
+            Promise.all([
+                runLegacyTest(apiKey, startTime),
+                runStreamingTest(apiKey, startTime)
+            ]).finally(() => {
+                document.getElementById('btn-legacy').disabled = false;
+                document.getElementById('btn-stream').disabled = false;
+            });
+        }
+
+        async function runLegacyTest(apiKey, globalStartTime) {
+            const chat = document.getElementById('legacy-chat');
+            const metrics = document.getElementById('legacy-metrics');
+            
+            const typing = createTypingIndicator();
+            chat.appendChild(typing);
+            chat.scrollTop = chat.scrollHeight;
+
+            metrics.textContent = "Generating complete response...";
+            metrics.style.color = "var(--text-secondary)";
+
+            try {
+                const response = await fetch(GATEWAY_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
+                    body: JSON.stringify(getPayload(false))
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) throw new Error(data.error?.message || "API Error");
+
+                const totalTime = ((performance.now() - globalStartTime) / 1000).toFixed(2);
+                metrics.textContent = `TTFB: ${totalTime}s | Rendered: ${totalTime}s`;
+                metrics.style.color = "#dc2626"; // Red for slow
+
+                // Remove typing indicator
+                chat.removeChild(typing);
+
+                // Add complete message
+                const parsed = JSON.parse(data.choices[0].message.content);
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble assistant';
+                bubble.textContent = parsed.coach;
+                chat.appendChild(bubble);
+
+                // Render cards instantly
+                renderCards(chat, parsed.cards);
+
+            } catch (err) {
+                metrics.textContent = `Error: ${err.message}`;
+                chat.removeChild(typing);
+            }
+        }
+
+        async function runStreamingTest(apiKey, globalStartTime) {
+            const chat = document.getElementById('stream-chat');
+            const metrics = document.getElementById('stream-metrics');
+            
+            metrics.textContent = "Connecting stream...";
+            metrics.style.color = "var(--text-secondary)";
+
+            try {
+                const response = await fetch(GATEWAY_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': apiKey
+                    },
+                    body: JSON.stringify(getPayload(true))
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error?.message || "API Error");
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                
+                let ttfb = null;
+                let bubble = null;
+                let cardsReadyFired = false;
+                let fullJsonString = "";
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    // Record TTFB on first actual byte
+                    if (!ttfb) {
+                        ttfb = ((performance.now() - globalStartTime) / 1000).toFixed(2);
+                        metrics.textContent = `TTFB: ${ttfb}s | Streaming...`;
+                        metrics.style.color = "#16a34a"; // Green for fast
+                        
+                        // Create the bubble instantly
+                        bubble = document.createElement('div');
+                        bubble.className = 'bubble assistant';
+                        chat.appendChild(bubble);
+                    }
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                
+                                // Accumulate the raw JSON string
+                                if (data.choices?.[0]?.delta?.content) {
+                                    fullJsonString += data.choices[0].delta.content;
+                                    
+                                    // Parse the accumulated string on the fly to extract the "coach" text
+                                    // This mirrors the Regex/Parsing logic we built into the Supabase Orchestrator
+                                    const coachMatch = /"coach"\s*:\s*"((?:[^"\\]|\\.)*)/.exec(fullJsonString);
+                                    if (coachMatch) {
+                                        try {
+                                            const unescapedText = JSON.parse('"' + coachMatch[1] + '"');
+                                            bubble.textContent = unescapedText;
+                                            chat.scrollTop = chat.scrollHeight;
+                                            
+                                            // Check if the coach string is closed
+                                            if (!cardsReadyFired && /"coach"\s*:\s*"((?:[^"\\]|\\.)*)"/.test(fullJsonString)) {
+                                                metrics.textContent = `TTFB: ${ttfb}s | Text Done. Waiting for cards...`;
+                                                cardsReadyFired = true;
+                                            }
+                                        } catch (e) {
+                                            // Ignore partial escapes
+                                        }
+                                    }
+                                }
+                            } catch (e) {
+                                // Ignore parse errors for split chunks
+                            }
+                        }
+                    }
+                }
+
+                // Stream complete, parse final JSON for cards
+                const totalTime = ((performance.now() - globalStartTime) / 1000).toFixed(2);
+                metrics.textContent = `TTFB: ${ttfb}s | Final Render: ${totalTime}s`;
+                
+                try {
+                    const finalData = JSON.parse(fullJsonString);
+                    renderCards(chat, finalData.cards);
+                } catch(e) {
+                    console.error("Failed to parse final JSON block", e);
+                }
+
+            } catch (err) {
+                metrics.textContent = `Error: ${err.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
